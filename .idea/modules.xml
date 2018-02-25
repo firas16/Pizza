@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/hashcode.iml" filepath="$PROJECT_DIR$/.idea/modules/hashcode.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/hashcode-build.iml" filepath="$PROJECT_DIR$/.idea/modules/hashcode-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/pizza.iml" filepath="$PROJECT_DIR$/.idea/modules/pizza.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/pizza-build.iml" filepath="$PROJECT_DIR$/.idea/modules/pizza-build.iml" />
     </modules>
   </component>
 </project>
