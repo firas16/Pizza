@@ -18,5 +18,6 @@ object main extends App {
       else
         Cell(line._2 - 1, x._2, Ingredient.Tomato)
     ))
-  print(cells(0))
+  val pizza = Pizza(cells.flatten.toArray)
+  print(pizza.cells.toList)
 }
