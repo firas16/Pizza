@@ -62,7 +62,7 @@ object Strategy {
   }
 
   def findCorrectSlice(pizza: Pizza, nbTomato: Int, nbMushroom: Int, slice: Slice = null): Option[Slice] = {
-    if(nbTomato == nbMushroom == 0)
+    if(nbTomato == 0 && nbMushroom == 0)
       Some(slice)
     else if(nbTomato == l && l == nbMushroom) {
       val firstCell = findNotSlicedCell(pizza)

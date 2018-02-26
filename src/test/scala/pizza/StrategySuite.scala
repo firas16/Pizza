@@ -1,6 +1,5 @@
 package pizza
 
-import org.scalatest.FlatSpec
 
 class StrategySuite extends UnitSpec {
 
