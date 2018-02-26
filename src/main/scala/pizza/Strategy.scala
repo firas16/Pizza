@@ -20,7 +20,7 @@ object Strategy {
     }
   }
 
-  def isSliceCorrect(slice: Slice, pizza: Pizza): Boolean = {
+  def isSliceCompleted(slice: Slice, pizza: Pizza): Boolean = {
 
     val cellsMorceau = getSliceCells(pizza, slice)
     val pizzaMorceau = Pizza(cellsMorceau.toArray)
@@ -30,7 +30,19 @@ object Strategy {
 
   }
 
+  def isSliceAdmissible(slice: Slice, pizza: Pizza): Boolean = {
+
+    val cellsMorceau = getSliceCells(pizza, slice)
+    val pizzaMorceau = Pizza(cellsMorceau.toArray)
+    val nbTomato = pizzaMorceau.nbTomato
+    val nbMushroom = pizzaMorceau.nbMushroom
+    return (nbTomato+nbMushroom <= h)
+
+  }
+
   def findNotSlicedCell(pizza: Pizza): Cell = pizza.cells.find(!_.sliced).get
+
+  def score(slice: Slice): Int = ???
 
   def expandSlice(pizza: Pizza, slice: Slice): Slice = {
     val lenghtRow = slice.row2 - slice.row1
@@ -38,17 +50,21 @@ object Strategy {
     val maxToAdd = h - lenghtRow * lengthCol
     if(maxToAdd <= 0)
       return slice
-
-    if(isSliceCorrect(Slice(slice.row1-1, slice.col1, slice.row2, slice.col2), pizza))
-      Slice(slice.row1-1, slice.col1, slice.row2, slice.col2)
-    else  if(isSliceCorrect(Slice(slice.row1, slice.col1-1, slice.row2, slice.col2), pizza))
-      Slice(slice.row1, slice.col1-1, slice.row2, slice.col2)
-    else  if(isSliceCorrect(Slice(slice.row1, slice.col1, slice.row2+1, slice.col2), pizza))
-      Slice(slice.row1, slice.col1, slice.row2+1, slice.col2)
-    else  if(isSliceCorrect(Slice(slice.row1, slice.col1, slice.row2, slice.col2+1), pizza))
-      Slice(slice.row1, slice.col1, slice.row2, slice.col2+1)
-    else
-      slice
+    val sliceGauche = Slice(slice.row1, slice.col1-1, slice.row2, slice.col2)
+    val sliceDroite = Slice(slice.row1, slice.col1, slice.row2, slice.col2+1)
+    val sliceUp = Slice(slice.row1-1, slice.col1, slice.row2, slice.col2)
+    val sliceDown = Slice(slice.row1, slice.col1, slice.row2+1, slice.col2)
+    val slices = List(sliceGauche, sliceDroite, sliceDown, sliceUp)
+    val res = slices.find(slic => isSliceCompleted(slic, pizza))
+    res match{
+      case slic: Slice => slic
+      case None =>
+        val admissibleSlices = slices.filter(isSliceAdmissible(_, pizza))
+        if(admissibleSlices.size>0)
+          admissibleSlices.sortBy(slice => score(slice)).head
+        else
+          slice
+      }
     }
 
   def updatePizza(pizza: Pizza, slice: Slice): Pizza = ???
