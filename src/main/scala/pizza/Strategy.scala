@@ -19,7 +19,9 @@ object Strategy {
     slice match {
       case Some(sl) =>
         val pizzaUpdated = updatePizza(pizza, Some(sl).get)
-        return slice.get :: run(pizzaUpdated, l, h)
+        if(isSliceCompleted(sl, pizza))
+          return slice.get :: run(pizzaUpdated, l, h)
+        else run(pizzaUpdated, l, h)
       case None => List.empty[Slice]
     }
   }
@@ -36,6 +38,8 @@ object Strategy {
     if(1 > slice.row1 || 1 > slice.col1 || slice.row2 > pizzaRows || slice.col2 > pizzaCols)
       return false
     val cellsMorceau = getSliceCells(pizza, slice)
+    if(cellsMorceau.exists(_.sliced))
+      return false
     val pizzaMorceau = Pizza(cellsMorceau.toArray)
     val nbTomato = pizzaMorceau.nbTomato
     val nbMushroom = pizzaMorceau.nbMushroom
@@ -65,6 +69,7 @@ object Strategy {
     val maxToAdd = h - lenghtRow * lengthCol
     if(maxToAdd <= 0)
       return slice
+
     val sliceGauche = Slice(slice.row1, slice.col1-1, slice.row2, slice.col2)
     val sliceDroite = Slice(slice.row1, slice.col1, slice.row2, slice.col2+1)
     val sliceUp = Slice(slice.row1-1, slice.col1, slice.row2, slice.col2)
@@ -84,7 +89,8 @@ object Strategy {
 
   def updatePizza(pizza: Pizza, slice: Slice): Pizza = {
     val cells = getSliceCells(pizza, slice)
-    val updatedCells = pizza.cells.map(cell => Cell(cell.x, cell.y, cell.ingredient, cells.contains(cell)))
+    val updatedCells = pizza.cells.map(cell =>
+      Cell(cell.x, cell.y, cell.ingredient, cells.contains(cell) || cell.sliced))
     Pizza(updatedCells)
   }
 
