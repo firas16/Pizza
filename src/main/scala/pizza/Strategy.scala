@@ -26,12 +26,30 @@ object Strategy {
     }
   }
 
+
+  def expandPizzaSlice(pizza: Pizza, slice: Slice): Slice = {
+    val newSlice = enhanceSlice(pizza, slice)
+    if(newSlice == slice)
+      return slice
+    else
+      expandPizzaSlice(pizza, newSlice)
+  }
+  def expandPizzaSlices(pizza: Pizza, slices: List[Slice]): List[Slice] = {
+
+    slices match {
+      case slice:: tail =>
+        val newSlice = expandPizzaSlice(pizza, slice)
+        val updatedPizza = updatePizza(pizza, newSlice)
+        return newSlice :: expandPizzaSlices(updatedPizza, tail)
+      case Nil => Nil
+    }
+  }
+
   def isSliceCompleted(slice: Slice, pizza: Pizza): Boolean = {
     val nbTomato = countIngredient(pizza, slice, Ingredient.Tomato)
     val nbMushroom = countIngredient(pizza, slice, Ingredient.Mushroom)
     isSliceAdmissible(slice, pizza) && nbTomato >= l && nbMushroom >= l
   }
-
 
   def isSliceAdmissible(slice: Slice, pizza: Pizza): Boolean = {
 
@@ -41,6 +59,21 @@ object Strategy {
     if(cellsMorceau.exists(_.sliced))
       return false
     val pizzaMorceau = Pizza(cellsMorceau.toArray)
+    val nbTomato = pizzaMorceau.nbTomato
+    val nbMushroom = pizzaMorceau.nbMushroom
+    return (nbTomato+nbMushroom <= h)
+
+  }
+
+  def isNewSliceAdmissible(newSlice: Slice, slice: Slice, pizza: Pizza): Boolean = {
+
+    if(1 > newSlice.row1 || 1 > newSlice.col1 || newSlice.row2 > pizzaRows || newSlice.col2 > pizzaCols)
+      return false
+    val cellsMorceau = getSliceCells(pizza, slice)
+    val newCellsMorceau = getSliceCells(pizza, newSlice)
+    if((newCellsMorceau diff cellsMorceau).exists(_.sliced))
+      return false
+    val pizzaMorceau = Pizza(newCellsMorceau.toArray)
     val nbTomato = pizzaMorceau.nbTomato
     val nbMushroom = pizzaMorceau.nbMushroom
     return (nbTomato+nbMushroom <= h)
@@ -57,10 +90,12 @@ object Strategy {
     }
 
   }
+
   def score(pizza: Pizza, slice: Slice): Int = {
     val nbMushroom = countIngredient(pizza, slice, Ingredient.Mushroom)
     val nbTomato = countIngredient(pizza, slice, Ingredient.Tomato)
-    return Math.max(l - nbMushroom,  0) + Math.max(l - nbTomato,  0)
+    val scoreSlice = Math.max(l - nbMushroom,  0) + Math.max(l - nbTomato,  0)
+    return scoreSlice
   }
 
   def expandSlice(pizza: Pizza, slice: Slice): Slice = {
@@ -87,6 +122,26 @@ object Strategy {
       }
     }
 
+  def enhanceSlice(pizza: Pizza, slice: Slice): Slice = {
+    val lenghtRow = slice.row2 - slice.row1
+    val lengthCol = slice.col2 - slice.col1
+    val maxToAdd = h - lenghtRow * lengthCol
+    if(maxToAdd <= 0)
+      return slice
+
+    val sliceGauche = Slice(slice.row1, slice.col1-1, slice.row2, slice.col2)
+    val sliceDroite = Slice(slice.row1, slice.col1, slice.row2, slice.col2+1)
+    val sliceUp = Slice(slice.row1-1, slice.col1, slice.row2, slice.col2)
+    val sliceDown = Slice(slice.row1, slice.col1, slice.row2+1, slice.col2)
+    val slices = List(sliceGauche, sliceDroite, sliceDown, sliceUp)
+    val admissibleSlices = slices.filter(isNewSliceAdmissible(_, slice, pizza))
+    if(admissibleSlices.size>0)
+       return admissibleSlices.sortBy(slice => score(pizza, slice)).reverse.head
+    else
+       return slice
+
+  }
+
   def updatePizza(pizza: Pizza, slice: Slice): Pizza = {
     val cells = getSliceCells(pizza, slice)
     val updatedCells = pizza.cells.map(cell =>
@@ -103,7 +158,7 @@ object Strategy {
   }
 
   def findCorrectSlice(pizza: Pizza, nbTomato: Int, nbMushroom: Int, slice: Slice = null): Option[Slice] = {
-    if(nbTomato < 0 && nbMushroom <= 0)
+    if(nbTomato <= 0 && nbMushroom <= 0)
       Some(slice)
     else if(nbTomato == l && l == nbMushroom) {
       val firstCell = findNotSlicedCell(pizza)
