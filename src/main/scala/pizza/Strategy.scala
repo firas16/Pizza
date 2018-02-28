@@ -4,10 +4,9 @@ import pizza.Ingredient.Ingredient
 
 object Strategy {
 
-  val l = 1
-  val h = 6
-  val pizzaRows = 3
-  val pizzaCols = 5
+  val l = 6
+  val h = 14
+
   def run(pizza: Pizza, l: Int, h: Int): List[Slice] = {
 
     val nbMushroom = pizza.cells.map(_.ingredient).count(ingredient => ingredient == Ingredient.Mushroom)
@@ -34,6 +33,7 @@ object Strategy {
     else
       expandPizzaSlice(pizza, newSlice)
   }
+
   def expandPizzaSlices(pizza: Pizza, slices: List[Slice]): List[Slice] = {
 
     slices match {
@@ -53,12 +53,12 @@ object Strategy {
 
   def isSliceAdmissible(slice: Slice, pizza: Pizza): Boolean = {
 
-    if(1 > slice.row1 || 1 > slice.col1 || slice.row2 > pizzaRows || slice.col2 > pizzaCols)
+    if(0 > slice.row1 || 0 > slice.col1 || slice.row2 > pizza.nbRows-1 || slice.col2 > pizza.nbCols-1)
       return false
     val cellsMorceau = getSliceCells(pizza, slice)
     if(cellsMorceau.exists(_.sliced))
       return false
-    val pizzaMorceau = Pizza(cellsMorceau.toArray)
+    val pizzaMorceau = Pizza(cellsMorceau.toArray, pizza.nbRows, pizza.nbCols)
     val nbTomato = pizzaMorceau.nbTomato
     val nbMushroom = pizzaMorceau.nbMushroom
     return (nbTomato+nbMushroom <= h)
@@ -67,13 +67,13 @@ object Strategy {
 
   def isNewSliceAdmissible(newSlice: Slice, slice: Slice, pizza: Pizza): Boolean = {
 
-    if(1 > newSlice.row1 || 1 > newSlice.col1 || newSlice.row2 > pizzaRows || newSlice.col2 > pizzaCols)
+    if(0 > newSlice.row1 || 0 > newSlice.col1 || newSlice.row2 > pizza.nbRows-1 || newSlice.col2 > pizza.nbCols-1)
       return false
     val cellsMorceau = getSliceCells(pizza, slice)
     val newCellsMorceau = getSliceCells(pizza, newSlice)
     if((newCellsMorceau diff cellsMorceau).exists(_.sliced))
       return false
-    val pizzaMorceau = Pizza(newCellsMorceau.toArray)
+    val pizzaMorceau = Pizza(newCellsMorceau.toArray, pizza.nbRows, pizza.nbCols)
     val nbTomato = pizzaMorceau.nbTomato
     val nbMushroom = pizzaMorceau.nbMushroom
     return (nbTomato+nbMushroom <= h)
@@ -146,7 +146,7 @@ object Strategy {
     val cells = getSliceCells(pizza, slice)
     val updatedCells = pizza.cells.map(cell =>
       Cell(cell.x, cell.y, cell.ingredient, cells.contains(cell) || cell.sliced))
-    Pizza(updatedCells)
+    Pizza(updatedCells, pizza.nbRows, pizza.nbCols)
   }
 
   def getSliceCells(pizza: Pizza, slice: Slice): List[Cell] = {
