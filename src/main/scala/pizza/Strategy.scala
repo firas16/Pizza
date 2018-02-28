@@ -2,12 +2,14 @@ package pizza
 
 import pizza.Ingredient.Ingredient
 
+import scala.util.Random
+
 object Strategy {
 
   val l = 6
   val h = 14
 
-  def run(pizza: Pizza, l: Int, h: Int): List[Slice] = {
+  def run(pizza: Pizza, l: Int, h: Int, tour: Int): List[Slice] = {
 
     val nbMushroom = pizza.cells.map(_.ingredient).count(ingredient => ingredient == Ingredient.Mushroom)
     val nbTomate = pizza.cells.map(_.ingredient).count(ingredient => ingredient == Ingredient.Tomato)
@@ -19,9 +21,9 @@ object Strategy {
       case Some(sl) =>
         val pizzaUpdated = updatePizza(pizza, Some(sl).get)
         if(isSliceCompleted(sl, pizza))
-          return slice.get :: run(pizzaUpdated, l, h)
-        else run(pizzaUpdated, l, h)
-      case None => List.empty[Slice]
+          return slice.get :: run(pizzaUpdated, l, h, tour)
+        else run(pizzaUpdated, l, h, tour)
+      case None => if(tour>0) run(pizza, l, h, tour-1) else List.empty[Slice]
     }
   }
 
@@ -80,7 +82,14 @@ object Strategy {
 
   }
 
-  def findNotSlicedCell(pizza: Pizza): Cell = pizza.cells.find(!_.sliced).get
+  def findNotSlicedCell(pizza: Pizza): Cell = {
+    val randGenerator = new Random()
+    if(pizza.cells.count(!_.sliced) <=0)
+      return Cell(-1, -1, Ingredient.Tomato)
+    val notSlicedCells = pizza.cells.filter(!_.sliced)
+    val order = randGenerator.nextInt(notSlicedCells.size)
+    return notSlicedCells(order)
+  }
 
   def countIngredient(pizza: Pizza, slice: Slice, ingredient: Ingredient): Int = {
     val cells = getSliceCells(pizza, slice)
@@ -162,6 +171,8 @@ object Strategy {
       Some(slice)
     else if(nbTomato == l && l == nbMushroom) {
       val firstCell = findNotSlicedCell(pizza)
+      if(firstCell.x == -1)
+        return Some(slice)
       firstCell.ingredient match {
         case Ingredient.Mushroom =>
           findCorrectSlice(pizza, nbTomato, nbMushroom-1, Slice(firstCell.x, firstCell.y, firstCell.x, firstCell.y))

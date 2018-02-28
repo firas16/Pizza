@@ -23,7 +23,7 @@ object main extends App {
   val pizza = Pizza(cells.flatten.toArray, params(0).toInt, params(1).toInt)
 
 
-  val slices = Strategy.run(pizza, params(2).toInt, params(3).toInt)
+  val slices = Strategy.run(pizza, params(2).toInt, params(3).toInt, 1000)
   print(slices)
   val usedCells = slices.flatMap(slice => Strategy.getSliceCells(pizza, slice))
   val updatedPizzaCells = pizza.cells.map(cell =>
