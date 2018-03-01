@@ -6,7 +6,9 @@ import scala.io.Source
 
 object main extends App {
 
-  val filePath = "src/main/scala/source/a_example.in"
+  //c_no_hurry
+  //d_metropolis
+  val filePath = "src/main/scala/source/c_no_hurry.in"
   for (line <- Source.fromFile(filePath).getLines){
   }
   val lines = Source.fromFile(filePath).getLines.toList
@@ -21,7 +23,7 @@ object main extends App {
 
   val result = StrategyFlotte.run(grid, rides, vehicles)
 
-  new PrintWriter("result.txt") {
+  new PrintWriter("resultc.txt") {
     result.map(x =>  write(x._2.size.toString +" " + x._2.mkString (" ")  + "\n"))
     close }
 }
