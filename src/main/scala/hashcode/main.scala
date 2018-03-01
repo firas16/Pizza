@@ -22,6 +22,6 @@ object main extends App {
   val result = StrategyFlotte.run(grid, rides, vehicles)
 
   new PrintWriter("result.txt") {
-    result.map(x =>  write(x._1.toString +" " + x._2.mkString (" ")  + "\n"))
+    result.map(x =>  write(x._2.size.toString +" " + x._2.mkString (" ")  + "\n"))
     close }
 }
